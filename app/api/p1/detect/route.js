@@ -1,6 +1,5 @@
-import { ImageAnnotatorClient } from "@google-cloud/vision";
-import path from "path";
 import sharp from "sharp";
+import { getImageAnnotatorClient } from "@/utils/googleAuth";
 
 export async function POST(request) {
   try {
@@ -12,9 +11,7 @@ export async function POST(request) {
       return Response.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    const client = new ImageAnnotatorClient({
-      keyFilename: path.join(process.cwd(), "google-credentials.json"),
-    });
+    const client = getImageAnnotatorClient();
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);

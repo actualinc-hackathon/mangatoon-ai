@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { GoogleAuth } from "google-auth-library";
-import path from "path";
 import sharp from "sharp";
+import { getGoogleAuth } from "@/utils/googleAuth";
 
 export async function POST(request) {
   try {
@@ -18,10 +17,7 @@ export async function POST(request) {
     const buffer = Buffer.from(arrayBuffer);
     const imageBase64 = buffer.toString("base64");
 
-    const auth = new GoogleAuth({
-      keyFilename: path.join(process.cwd(), "google-credentials.json"),
-      scopes: ["https://www.googleapis.com/auth/cloud-platform"],
-    });
+    const auth = getGoogleAuth();
 
     const client = await auth.getClient();
     const projectId = "mangatoon-480314";
