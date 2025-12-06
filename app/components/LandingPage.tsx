@@ -10,11 +10,13 @@ import Footer from "./Footer";
 interface LandingPageProps {
   onNavigateToTool: () => void;
   onNavigateToCharacterInserter: () => void;
+  onNavigateToCollageEditor: () => void;
 }
 
 export default function LandingPage({
   onNavigateToTool,
   onNavigateToCharacterInserter,
+  onNavigateToCollageEditor,
 }: LandingPageProps) {
   const featuresRef = useRef<HTMLElement>(null);
 
@@ -44,22 +46,22 @@ export default function LandingPage({
       action: onNavigateToCharacterInserter,
     },
     {
-      id: "bubble-editor",
-      title: "Chat Bubble Editor",
-      subtitle: "吹き出し編集",
+      id: "manga-studio",
+      title: "Manga Studio",
+      subtitle: "マンガスタジオ",
       description:
-        "Add speech bubbles, thought clouds, and text boxes with authentic manga typography and styles.",
-      icon: "💬",
-      status: "coming-soon" as const,
-      action: null,
+        "Create stunning manga pages with multiple images, speech bubbles, text, and frames. Build complete manga panels with professional layouts and styling.",
+      icon: "✨",
+      status: "available" as const,
+      action: onNavigateToCollageEditor,
     },
     {
-      id: "collage-maker",
-      title: "Collage Maker",
-      subtitle: "コラージュ作成",
+      id: "character-creation",
+      title: "Character Creation",
+      subtitle: "キャラクター作成",
       description:
-        "Combine multiple panels and scenes into stunning manga page layouts with dynamic compositions.",
-      icon: "🖼️",
+        "Transform real photos into animated manga characters! Upload your image and convert it to black & white manga style. Perfect for creating your own character or testing with any image.",
+      icon: "🎭",
       status: "coming-soon" as const,
       action: null,
     },
