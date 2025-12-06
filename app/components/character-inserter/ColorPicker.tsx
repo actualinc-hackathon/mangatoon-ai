@@ -47,7 +47,9 @@ export default function ColorPicker({
     if (!ctx) return;
 
     const imageData = ctx.getImageData(x, y, 1, 1);
-    const [r, g, b] = imageData.data;
+    const r = imageData.data[0];
+    const g = imageData.data[1];
+    const b = imageData.data[2];
     onColorPicked({ r, g, b });
     setIsPicking(false);
   };
