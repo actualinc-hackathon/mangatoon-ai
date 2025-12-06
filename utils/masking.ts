@@ -1,13 +1,21 @@
+export interface Detection {
+  box: {
+    xmin: number;
+    ymin: number;
+    xmax: number;
+    ymax: number;
+  };
+}
+
 /**
  * Converts a File object to a Base64 string
- * @param {File} file - The file to convert
- * @returns {Promise<string>} - Base64 encoded string
  */
-export function fileToBase64(file) {
+export function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
-      const base64 = reader.result.split(",")[1];
+      const result = reader.result as string;
+      const base64 = result.split(",")[1];
       resolve(base64);
     };
     reader.onerror = reject;
@@ -17,11 +25,11 @@ export function fileToBase64(file) {
 
 /**
  * Creates a mask image from bounding box detections
- * @param {File} imageFile - The original image file
- * @param {Array} detections - Array of detection objects with box property containing xmin, ymin, xmax, ymax
- * @returns {Promise<string>} - Base64 encoded mask image
  */
-export function createMaskBase64(imageFile, detections) {
+export function createMaskBase64(
+  imageFile: File,
+  detections: Detection[]
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const url = URL.createObjectURL(imageFile);
@@ -31,6 +39,12 @@ export function createMaskBase64(imageFile, detections) {
       canvas.width = img.width;
       canvas.height = img.height;
       const ctx = canvas.getContext("2d");
+
+      if (!ctx) {
+        URL.revokeObjectURL(url);
+        reject(new Error("Failed to get canvas context"));
+        return;
+      }
 
       // Fill the entire canvas with black
       ctx.fillStyle = "black";
@@ -66,3 +80,4 @@ export function createMaskBase64(imageFile, detections) {
     img.src = url;
   });
 }
+
