@@ -32,7 +32,7 @@ export default function CharacterInserter({ onBack }: CharacterInserterProps) {
   const [processing, setProcessing] = useState(false);
   const [status, setStatus] = useState("");
   const [resultUrl, setResultUrl] = useState<string | null>(null);
-  const [threshold, setThreshold] = useState(240);
+  const [threshold, setThreshold] = useState(218);
   const [mode, setMode] = useState<"sketch" | "photo">("sketch");
   const [showBackgroundEditor, setShowBackgroundEditor] = useState(false);
   const [editedCharacterUrl, setEditedCharacterUrl] = useState<string | null>(

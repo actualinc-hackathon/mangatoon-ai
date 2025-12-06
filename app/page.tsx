@@ -7,13 +7,15 @@ import {
   SketchConverter,
   CharacterInserter,
   CollageEditor,
+  CharacterCreator,
 } from "@/app/components";
 
 type ViewType =
   | "landing"
   | "sketch-converter"
   | "character-inserter"
-  | "collage-editor";
+  | "collage-editor"
+  | "character-creator";
 
 export default function Home() {
   const [currentView, setCurrentView] = useState<ViewType>("landing");
@@ -32,9 +34,12 @@ export default function Home() {
     const hash = window.location.hash.slice(1);
     if (
       hash &&
-      ["sketch-converter", "character-inserter", "collage-editor"].includes(
-        hash
-      )
+      [
+        "sketch-converter",
+        "character-inserter",
+        "collage-editor",
+        "character-creator",
+      ].includes(hash)
     ) {
       setCurrentView(hash as ViewType);
     }
@@ -64,6 +69,8 @@ export default function Home() {
         return <CharacterInserter onBack={navigateBack} />;
       case "collage-editor":
         return <CollageEditor onBack={navigateBack} />;
+      case "character-creator":
+        return <CharacterCreator onBack={navigateBack} />;
       default:
         return (
           <LandingPage
@@ -72,6 +79,9 @@ export default function Home() {
               navigateToView("character-inserter")
             }
             onNavigateToCollageEditor={() => navigateToView("collage-editor")}
+            onNavigateToCharacterCreator={() =>
+              navigateToView("character-creator")
+            }
           />
         );
     }

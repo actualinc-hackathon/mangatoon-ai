@@ -11,12 +11,14 @@ interface LandingPageProps {
   onNavigateToTool: () => void;
   onNavigateToCharacterInserter: () => void;
   onNavigateToCollageEditor: () => void;
+  onNavigateToCharacterCreator: () => void;
 }
 
 export default function LandingPage({
   onNavigateToTool,
   onNavigateToCharacterInserter,
   onNavigateToCollageEditor,
+  onNavigateToCharacterCreator,
 }: LandingPageProps) {
   const featuresRef = useRef<HTMLElement>(null);
 
@@ -60,10 +62,10 @@ export default function LandingPage({
       title: "Character Creation",
       subtitle: "キャラクター作成",
       description:
-        "Transform real photos into animated manga characters! Upload your image and convert it to black & white manga style. Perfect for creating your own character or testing with any image.",
+        "Transform real photos into animated manga characters! Upload your image and convert it to anime style using AI. Perfect for creating your own character for use in manga studio.",
       icon: "🎭",
-      status: "coming-soon" as const,
-      action: null,
+      status: "available" as const,
+      action: onNavigateToCharacterCreator,
     },
   ];
 

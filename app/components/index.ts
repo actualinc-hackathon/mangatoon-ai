@@ -8,4 +8,5 @@ export { default as LandingPage } from "./LandingPage";
 export * from "./sketch-converter";
 export * from "./character-inserter";
 export * from "./collage-editor";
+export * from "./character-creator";
 
