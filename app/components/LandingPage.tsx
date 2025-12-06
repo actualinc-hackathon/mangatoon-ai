@@ -9,9 +9,13 @@ import Footer from "./Footer";
 
 interface LandingPageProps {
   onNavigateToTool: () => void;
+  onNavigateToCharacterInserter: () => void;
 }
 
-export default function LandingPage({ onNavigateToTool }: LandingPageProps) {
+export default function LandingPage({
+  onNavigateToTool,
+  onNavigateToCharacterInserter,
+}: LandingPageProps) {
   const featuresRef = useRef<HTMLElement>(null);
 
   const scrollToFeatures = () => {
@@ -36,8 +40,8 @@ export default function LandingPage({ onNavigateToTool }: LandingPageProps) {
       description:
         "Add or upload your own manga characters to your scenes. Position and scale them perfectly in your artwork.",
       icon: "👤",
-      status: "coming-soon" as const,
-      action: null,
+      status: "available" as const,
+      action: onNavigateToCharacterInserter,
     },
     {
       id: "bubble-editor",

@@ -6,4 +6,5 @@ export { default as HowItWorksSection } from "./HowItWorksSection";
 export { default as Footer } from "./Footer";
 export { default as LandingPage } from "./LandingPage";
 export * from "./sketch-converter";
+export * from "./character-inserter";
 
