@@ -24,38 +24,38 @@ export default function LandingPage({ onNavigateToTool }: LandingPageProps) {
       title: "Manga Sketch",
       subtitle: "スケッチ変換",
       description:
-        "Transform any photo into authentic manga-style artwork. AI removes text, logos & ads, then converts to beautiful sketch style.",
-      icon: "✏️",
+        "Transform any photo into authentic manga-style background artwork. AI removes text, logos & ads, then converts to beautiful sketch style.",
+      icon: "🎨",
       status: "available" as const,
       action: onNavigateToTool,
     },
     {
-      id: "panel-creator",
-      title: "Panel Creator",
-      subtitle: "パネル作成",
+      id: "character-studio",
+      title: "Add Characters",
+      subtitle: "キャラ追加",
       description:
-        "Create dynamic manga panels with speech bubbles, effects, and authentic Japanese typography.",
-      icon: "💬",
-      status: "coming-soon" as const,
-      action: null,
-    },
-    {
-      id: "character-gen",
-      title: "Character Gen",
-      subtitle: "キャラ生成",
-      description:
-        "Generate original manga characters with customizable styles, expressions, and poses.",
+        "Add or upload your own manga characters to your scenes. Position and scale them perfectly in your artwork.",
       icon: "👤",
       status: "coming-soon" as const,
       action: null,
     },
     {
-      id: "effect-studio",
-      title: "Effect Studio",
-      subtitle: "効果スタジオ",
+      id: "bubble-editor",
+      title: "Chat Bubble Editor",
+      subtitle: "吹き出し編集",
       description:
-        "Add speed lines, impact frames, screentones, and iconic manga effects to any image.",
-      icon: "💥",
+        "Add speech bubbles, thought clouds, and text boxes with authentic manga typography and styles.",
+      icon: "💬",
+      status: "coming-soon" as const,
+      action: null,
+    },
+    {
+      id: "collage-maker",
+      title: "Collage Maker",
+      subtitle: "コラージュ作成",
+      description:
+        "Combine multiple panels and scenes into stunning manga page layouts with dynamic compositions.",
+      icon: "🖼️",
       status: "coming-soon" as const,
       action: null,
     },
@@ -77,4 +77,3 @@ export default function LandingPage({ onNavigateToTool }: LandingPageProps) {
     </main>
   );
 }
-
