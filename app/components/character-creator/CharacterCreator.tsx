@@ -52,8 +52,17 @@ export default function CharacterCreator({ onBack }: CharacterCreatorProps) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Conversion failed");
+        let errorMessage = `Conversion failed (${response.status})`;
+        try {
+          const errorText = await response.text();
+          if (errorText && errorText.trim().length > 0) {
+            const errorData = JSON.parse(errorText);
+            errorMessage = errorData.error || errorMessage;
+          }
+        } catch {
+          // If parsing fails, use default error message
+        }
+        throw new Error(errorMessage);
       }
 
       const resultBlob = await response.blob();
@@ -61,7 +70,8 @@ export default function CharacterCreator({ onBack }: CharacterCreatorProps) {
       setStatus("Done!");
       setProgress(100);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       setStatus(`Error: ${errorMessage}`);
       setProgress(0);
     } finally {
@@ -194,4 +204,3 @@ export default function CharacterCreator({ onBack }: CharacterCreatorProps) {
     </main>
   );
 }
-

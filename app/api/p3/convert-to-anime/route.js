@@ -5,7 +5,18 @@ import { getGoogleAuth } from "@/utils/googleAuth";
 export async function POST(request) {
   try {
     console.log("[API] Photo-to-anime conversion request received");
-    const formData = await request.formData();
+
+    let formData;
+    try {
+      formData = await request.formData();
+    } catch (formError) {
+      console.error("[API] FormData parsing error:", formError);
+      return NextResponse.json(
+        { error: "Invalid request format" },
+        { status: 400 }
+      );
+    }
+
     const file = formData.get("file");
 
     if (!file) {
@@ -18,7 +29,6 @@ export async function POST(request) {
     const imageBase64 = buffer.toString("base64");
 
     const auth = getGoogleAuth();
-
     const client = await auth.getClient();
     const projectId = "mangatoon-480314";
     const location = "us-central1";
@@ -96,9 +106,14 @@ export async function POST(request) {
     }
   } catch (error) {
     console.error("[API] Conversion error:", error);
+    const errorMessage =
+      error?.message || error?.toString() || "Conversion failed";
     return NextResponse.json(
-      { error: error.message || "Conversion failed" },
-      { status: 500 }
+      { error: errorMessage },
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
     );
   }
 }
