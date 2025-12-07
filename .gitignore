@@ -45,3 +45,6 @@ google-credentials.json
 *.swo
 *~
 
+
+# Local Netlify folder
+.netlify

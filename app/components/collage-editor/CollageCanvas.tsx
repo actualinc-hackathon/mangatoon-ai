@@ -156,9 +156,48 @@ const CollageCanvas = forwardRef<HTMLCanvasElement, CollageCanvasProps>(
       return null;
     };
 
+    const getBubbleResizeHandle = (bubble: SpeechBubble, x: number, y: number): string | null => {
+      const handleSize = 12; // Handle size in canvas coordinates
+      const handles = [
+        { name: "nw", x: bubble.x, y: bubble.y },
+        { name: "ne", x: bubble.x + bubble.width, y: bubble.y },
+        { name: "sw", x: bubble.x, y: bubble.y + bubble.height },
+        { name: "se", x: bubble.x + bubble.width, y: bubble.y + bubble.height },
+        { name: "n", x: bubble.x + bubble.width / 2, y: bubble.y },
+        { name: "s", x: bubble.x + bubble.width / 2, y: bubble.y + bubble.height },
+        { name: "w", x: bubble.x, y: bubble.y + bubble.height / 2 },
+        { name: "e", x: bubble.x + bubble.width, y: bubble.y + bubble.height / 2 },
+      ];
+
+      for (const handle of handles) {
+        const dx = x - handle.x;
+        const dy = y - handle.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < handleSize) {
+          return handle.name;
+        }
+      }
+      return null;
+    };
+
     const handleMouseDown = (e: React.MouseEvent) => {
       const coords = getCoordinates(e);
       let clicked = false;
+
+      // Check if clicking on resize handle for selected speech bubble
+      if (selectedElement?.startsWith("bubble-")) {
+        const bubble = speechBubbles.find((b) => b.id === selectedElement);
+        if (bubble) {
+          const handle = getBubbleResizeHandle(bubble, coords.x, coords.y);
+          if (handle) {
+            setIsResizing(true);
+            setResizeHandle(handle);
+            setResizeStart({ width: bubble.width, height: bubble.height, x: bubble.x, y: bubble.y });
+            clicked = true;
+            return;
+          }
+        }
+      }
 
       // Check if clicking on resize handle for selected image
       if (selectedElement?.startsWith("img-")) {
@@ -175,20 +214,39 @@ const CollageCanvas = forwardRef<HTMLCanvasElement, CollageCanvasProps>(
         }
       }
 
-      // Check images (reverse order for top-most first)
-      for (let i = images.length - 1; i >= 0; i--) {
-        const img = images[i];
+      // Check speech bubbles FIRST (so they can be selected even when over images)
+      for (let i = speechBubbles.length - 1; i >= 0; i--) {
+        const bubble = speechBubbles[i];
         if (
-          coords.x >= img.x &&
-          coords.x <= img.x + img.width &&
-          coords.y >= img.y &&
-          coords.y <= img.y + img.height
+          coords.x >= bubble.x &&
+          coords.x <= bubble.x + bubble.width &&
+          coords.y >= bubble.y &&
+          coords.y <= bubble.y + bubble.height
         ) {
-          onElementSelect(img.id);
+          onElementSelect(bubble.id);
           setIsDragging(true);
-          setDragStart({ x: coords.x - img.x, y: coords.y - img.y });
+          setDragStart({ x: coords.x - bubble.x, y: coords.y - bubble.y });
           clicked = true;
           break;
+        }
+      }
+
+      // Check images (reverse order for top-most first)
+      if (!clicked) {
+        for (let i = images.length - 1; i >= 0; i--) {
+          const img = images[i];
+          if (
+            coords.x >= img.x &&
+            coords.x <= img.x + img.width &&
+            coords.y >= img.y &&
+            coords.y <= img.y + img.height
+          ) {
+            onElementSelect(img.id);
+            setIsDragging(true);
+            setDragStart({ x: coords.x - img.x, y: coords.y - img.y });
+            clicked = true;
+            break;
+          }
         }
       }
 
@@ -212,25 +270,6 @@ const CollageCanvas = forwardRef<HTMLCanvasElement, CollageCanvasProps>(
         }
       }
 
-      // Check speech bubbles
-      if (!clicked) {
-        for (let i = speechBubbles.length - 1; i >= 0; i--) {
-          const bubble = speechBubbles[i];
-          if (
-            coords.x >= bubble.x &&
-            coords.x <= bubble.x + bubble.width &&
-            coords.y >= bubble.y &&
-            coords.y <= bubble.y + bubble.height
-          ) {
-            onElementSelect(bubble.id);
-            setIsDragging(true);
-            setDragStart({ x: coords.x - bubble.x, y: coords.y - bubble.y });
-            clicked = true;
-            break;
-          }
-        }
-      }
-
       if (!clicked) {
         onElementSelect(null);
       }
@@ -239,7 +278,71 @@ const CollageCanvas = forwardRef<HTMLCanvasElement, CollageCanvasProps>(
     const handleMouseMove = (e: React.MouseEvent) => {
       const coords = getCoordinates(e);
 
-      // Handle resizing
+      // Handle resizing speech bubbles
+      if (isResizing && selectedElement?.startsWith("bubble-") && resizeHandle) {
+        const bubble = speechBubbles.find((b) => b.id === selectedElement);
+        if (bubble) {
+          let newX = bubble.x;
+          let newY = bubble.y;
+          let newWidth = bubble.width;
+          let newHeight = bubble.height;
+
+          const aspectRatio = resizeStart.width / resizeStart.height;
+          const shiftKey = e.shiftKey; // Hold shift to maintain aspect ratio
+
+          switch (resizeHandle) {
+            case "nw":
+              newWidth = resizeStart.width + (resizeStart.x - coords.x);
+              newHeight = shiftKey ? newWidth / aspectRatio : resizeStart.height + (resizeStart.y - coords.y);
+              newX = resizeStart.x + resizeStart.width - newWidth;
+              newY = resizeStart.y + resizeStart.height - newHeight;
+              break;
+            case "ne":
+              newWidth = coords.x - resizeStart.x;
+              newHeight = shiftKey ? newWidth / aspectRatio : resizeStart.height + (resizeStart.y - coords.y);
+              newY = resizeStart.y + resizeStart.height - newHeight;
+              break;
+            case "sw":
+              newWidth = resizeStart.width + (resizeStart.x - coords.x);
+              newHeight = shiftKey ? newWidth / aspectRatio : coords.y - resizeStart.y;
+              newX = resizeStart.x + resizeStart.width - newWidth;
+              break;
+            case "se":
+              newWidth = coords.x - resizeStart.x;
+              newHeight = shiftKey ? newWidth / aspectRatio : coords.y - resizeStart.y;
+              break;
+            case "n":
+              newHeight = resizeStart.height + (resizeStart.y - coords.y);
+              newY = resizeStart.y + resizeStart.height - newHeight;
+              break;
+            case "s":
+              newHeight = coords.y - resizeStart.y;
+              break;
+            case "w":
+              newWidth = resizeStart.width + (resizeStart.x - coords.x);
+              newX = resizeStart.x + resizeStart.width - newWidth;
+              break;
+            case "e":
+              newWidth = coords.x - resizeStart.x;
+              break;
+          }
+
+          // Minimum size constraints
+          if (newWidth < 50) newWidth = 50;
+          if (newHeight < 30) newHeight = 30;
+
+          onSpeechBubblesChange(
+            speechBubbles.map((b) =>
+              b.id === selectedElement
+                ? { ...b, x: newX, y: newY, width: newWidth, height: newHeight }
+                : b
+            )
+          );
+        }
+        return;
+      }
+
+      // Handle resizing images
       if (isResizing && selectedElement?.startsWith("img-") && resizeHandle) {
         const img = images.find((i) => i.id === selectedElement);
         if (img) {
@@ -368,7 +471,8 @@ const CollageCanvas = forwardRef<HTMLCanvasElement, CollageCanvasProps>(
         const bubble = speechBubbles.find((b) => b.id === selectedElement);
         if (bubble) {
           setEditingText(selectedElement);
-          setEditingTextValue(bubble.text);
+          // Clear placeholder text when editing starts
+          setEditingTextValue(bubble.text === "Double click to edit" ? "" : bubble.text);
         }
       }
     };
@@ -520,7 +624,7 @@ const CollageCanvas = forwardRef<HTMLCanvasElement, CollageCanvasProps>(
         ctx.save();
         ctx.fillStyle = "#ffffff";
         ctx.strokeStyle = selectedElement === bubble.id ? "#ff2d2d" : "#000000";
-        ctx.lineWidth = 2;
+        ctx.lineWidth = selectedElement === bubble.id ? 3 : 2;
 
         // Draw bubble shape
         drawRoundedRect(bubble.x, bubble.y, bubble.width, bubble.height, 10);
@@ -549,6 +653,36 @@ const CollageCanvas = forwardRef<HTMLCanvasElement, CollageCanvasProps>(
             bubble.y + bubble.height / 2 + (i - (lines.length - 1) / 2) * bubble.fontSize
           );
         });
+
+        // Draw selection border and resize handles for selected bubble
+        if (selectedElement === bubble.id) {
+          ctx.strokeStyle = "#ff2d2d";
+          ctx.lineWidth = 3;
+          ctx.setLineDash([5, 5]);
+          ctx.strokeRect(bubble.x, bubble.y, bubble.width, bubble.height);
+          ctx.setLineDash([]);
+
+          // Draw resize handles
+          ctx.fillStyle = "#ff2d2d";
+          ctx.strokeStyle = "#fff";
+          ctx.lineWidth = 2;
+          const handleSize = 12;
+          const handles = [
+            { x: bubble.x, y: bubble.y },
+            { x: bubble.x + bubble.width, y: bubble.y },
+            { x: bubble.x, y: bubble.y + bubble.height },
+            { x: bubble.x + bubble.width, y: bubble.y + bubble.height },
+            { x: bubble.x + bubble.width / 2, y: bubble.y },
+            { x: bubble.x + bubble.width / 2, y: bubble.y + bubble.height },
+            { x: bubble.x, y: bubble.y + bubble.height / 2 },
+            { x: bubble.x + bubble.width, y: bubble.y + bubble.height / 2 },
+          ];
+          handles.forEach((handle) => {
+            ctx.fillRect(handle.x - handleSize / 2, handle.y - handleSize / 2, handleSize, handleSize);
+            ctx.strokeRect(handle.x - handleSize / 2, handle.y - handleSize / 2, handleSize, handleSize);
+          });
+        }
+
         ctx.restore();
       });
 
@@ -625,12 +759,22 @@ const CollageCanvas = forwardRef<HTMLCanvasElement, CollageCanvasProps>(
               <textarea
                 value={editingTextValue}
                 onChange={(e) => setEditingTextValue(e.target.value)}
-                onBlur={handleTextEditSubmit}
+                onFocus={(e) => {
+                  // Clear placeholder text when focused
+                  if (editingTextValue === "Double click to edit") {
+                    setEditingTextValue("");
+                  }
+                }}
                 onKeyDown={(e) => {
+                  // Clear placeholder text on first keypress
+                  if (editingTextValue === "Double click to edit" && e.key.length === 1) {
+                    setEditingTextValue("");
+                  }
                   if (e.key === "Enter" && e.ctrlKey) {
                     handleTextEditSubmit();
                   }
                 }}
+                onBlur={handleTextEditSubmit}
                 style={{
                   width: "300px",
                   height: "100px",

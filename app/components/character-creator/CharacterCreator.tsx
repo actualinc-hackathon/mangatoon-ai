@@ -60,7 +60,7 @@ export default function CharacterCreator({ onBack }: CharacterCreatorProps) {
             errorMessage = errorData.error || errorMessage;
           }
         } catch {
-          // If parsing fails, use default error message
+          // If parsing fails, use default
         }
         throw new Error(errorMessage);
       }
